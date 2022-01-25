@@ -3,7 +3,7 @@ use self::filter::prefilter::*;
 use self::filter::rule::*;
 use self::filter::result::*;
 use std::collections::HashMap;
-use wirefilter::{ExecutionContext, Scheme, Type, FilterAst};
+use wirefilter::{Scheme};
 fn main() {
     let mut rs = Vec::new();
     let r1: Rule = serde_json::from_str(&r#"{"id":"010000092","keyword":[{"id":4000,"content":"=","check_after":"none","target":["req.filename","req.args"]},{"id":4003,"content":"ref","check_after":"both","target":["req.filename","req.args"]}],"content":"((keyword contains \"|4000:req.filename|\" && keyword contains \"|4003:req.filename|\") && req.filename matches \"href=\") || ((keyword contains \"|4000:req.args|\" && keyword contains \"|4003:req.args|\") && req.args matches \"href=\")"}"#.to_string()).unwrap();

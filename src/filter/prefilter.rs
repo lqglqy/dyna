@@ -4,7 +4,7 @@ use super::keyword::KeywordFilter;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use super::result::MatchResult;
-use wirefilter::{ExecutionContext, Scheme, Type, FilterAst};
+use wirefilter::{ExecutionContext, Scheme};
 
 pub struct Prefilter {
     maps: HashMap<String, KeywordFilter>, // key: req.filename value: 
@@ -15,7 +15,7 @@ pub struct Prefilter {
 pub fn add_rule(rs: &mut HashMap<String, RtRule>, r: &Rule) {
 
     match rs.get(&r.id.clone()) {
-        Some(v) => {
+        Some(_) => {
             println!("rule already exist!");
         }
         _ => {
@@ -26,7 +26,6 @@ pub fn add_rule(rs: &mut HashMap<String, RtRule>, r: &Rule) {
 
 impl<'s> Prefilter {
     pub(crate) fn new(rs: &Vec<Rule>) -> Self {
-        let mut kmf: HashMap<String, KeywordFilter> = HashMap::new();
         let mut kmf: HashMap<String, KeywordFilter> = HashMap::new();
 
         for r in rs {
@@ -67,7 +66,7 @@ impl<'s> Prefilter {
 }
 
 pub struct RuleFilter<'s> {
-    pub Rules: HashMap<String, RtRule<'s>>
+    pub rules: HashMap<String, RtRule<'s>>
 }
 
 impl<'s> RuleFilter<'s> {
@@ -77,7 +76,7 @@ impl<'s> RuleFilter<'s> {
             hmap.insert(v.id.clone(), RtRule::new(&v, scheme));
         }
         RuleFilter {
-            Rules: hmap
+            rules: hmap
         }
     }
     pub fn exec(self, scheme: &'s Scheme, feilds: &'s HashMap<String,String>, mctx: MatchResult) {
@@ -100,7 +99,7 @@ impl<'s> RuleFilter<'s> {
         }
 
         for k in hit_rules {
-            match self.Rules.get(&k) {
+            match self.rules.get(&k) {
                 Some(rule) => {
                     println!("hit rule: {}", rule.rid.clone());
                     println!("Filter matches: {:?}", rule.filter.execute(&ctx)); 

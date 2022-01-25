@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use wirefilter::{ExecutionContext, Scheme, Type, Filter, FilterAst};
+use wirefilter::{Scheme, Filter};
 pub struct RtRule<'s> {
     pub filter: Filter<'s>,
     pub rid: String,
