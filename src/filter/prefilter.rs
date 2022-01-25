@@ -1,42 +1,115 @@
-use aho_corasick::AhoCorasickBuilder;
-use aho_corasick::AhoCorasick;
 use super::rule::Rule;
+use super::rule::RtRule;
+use super::keyword::KeywordFilter;
+use std::collections::HashMap;
+use std::collections::HashSet;
+use super::result::MatchResult;
+use wirefilter::{ExecutionContext, Scheme, Type, FilterAst};
 
-pub struct Prefilter<'s> {
-    ac: AhoCorasick,
-    rules: Vec<&'s Rule>,
-    keywords: Vec<String>
+pub struct Prefilter {
+    maps: HashMap<String, KeywordFilter>, // key: req.filename value: 
 }
 
-impl<'s> Prefilter<'s> {
-    pub(crate) fn new(rules: &'s Vec<Rule>) -> Self {
-        let mut ks = Vec::new();
-        let mut rs = Vec::new();
-        for r in rules {
-            ks.push(r.get_keyword());
-            rs.push(r);
+
+
+pub fn add_rule(rs: &mut HashMap<String, RtRule>, r: &Rule) {
+
+    match rs.get(&r.id.clone()) {
+        Some(v) => {
+            println!("rule already exist!");
+        }
+        _ => {
+            //rs.insert(r.id.clone(), RtRule::new(r));
+        }
+    }
+}
+
+impl<'s> Prefilter {
+    pub(crate) fn new(rs: &Vec<Rule>) -> Self {
+        let mut kmf: HashMap<String, KeywordFilter> = HashMap::new();
+        let mut kmf: HashMap<String, KeywordFilter> = HashMap::new();
+
+        for r in rs {
+            for k in &r.keyword {
+                for feild in &k.target {
+                    let kf = kmf.entry(feild.clone()).or_insert(KeywordFilter::new());
+                    kf.add(k.id, r.id.clone(), k.content.clone(), match &k.after_check {
+                        Some(f) => f.clone(),
+                        _ => "none".to_string()});
+                }
+            }
+            for (_, v) in &mut kmf {
+                v.build();
+            }
         }
         Prefilter {
-            ac: AhoCorasickBuilder::new()
-            .dfa(true)
-            .build(ks.clone()),
-            rules: rs,
-            keywords: ks
+            maps: kmf,
         }
     }
+    
+    pub fn destroy(self) {
 
-    pub fn find(&mut self, s: String) {
-        let mat = self.ac.find(s).expect("should have a match");
-        println!("match {}", mat.pattern());
     }
 
-    pub fn find_all(&mut self, s: String) {
-        for mat in self.ac.find_iter(&s) {
-            println!("pattern {} start {} end {} ",mat.pattern(), mat.start(), mat.end());
-            println!("keyword {}", self.rules[mat.pattern()].get_keyword());
-            println!("keywords {}", self.keywords[mat.pattern()]);
+    pub fn exec(self, feilds: &HashMap<String,String>, mctx: & mut MatchResult) {
+        for (feild, content) in feilds.iter() {
+            match self.maps.get(feild) {
+                Some(v) => {
+                    v.find_all(mctx, content, feild);
+                }
+                _ => {
+                    println!("not found!!!")
+                }
+            }
+        }
+
+    }
+}
+
+pub struct RuleFilter<'s> {
+    pub Rules: HashMap<String, RtRule<'s>>
+}
+
+impl<'s> RuleFilter<'s> {
+    pub(crate) fn new(rules: &Vec<Rule>, scheme: &'s Scheme) -> Self {
+        let mut hmap = HashMap::new();
+        for v in rules {
+            hmap.insert(v.id.clone(), RtRule::new(&v, scheme));
+        }
+        RuleFilter {
+            Rules: hmap
+        }
+    }
+    pub fn exec(self, scheme: &'s Scheme, feilds: &'s HashMap<String,String>, mctx: MatchResult) {
+        let mut hit_rules:HashSet<String> = HashSet::new();
+        mctx.get_hit_rules(&mut hit_rules);
+        let mut ctx = ExecutionContext::new(&scheme);
+        let mut fs = vec![];
+        let mut val = vec![];
+        for (k,v) in feilds.iter() {
+            fs.push(&k[..]);
+            val.push(&v[..]);
+            match ctx.set_field_value(fs[fs.len()-1], val[val.len()-1]) {
+                Ok(_) => {
+                    println!("@@@set feild OK: {} value: {}", fs[fs.len()-1], val[val.len()-1]);
+                },
+                Err(err) => {
+                    println!("###set filed value error: {}", err);
+                }
+            }
+        }
+
+        for k in hit_rules {
+            match self.Rules.get(&k) {
+                Some(rule) => {
+                    println!("hit rule: {}", rule.rid.clone());
+                    println!("Filter matches: {:?}", rule.filter.execute(&ctx)); 
+                },
+                _ => {
+                    println!("not found rule {}", &k);
+                }
+            }
         }
     }
 
 }
-
