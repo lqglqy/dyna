@@ -15,10 +15,75 @@ pub struct KeywordFilter {
     keyword_vec: Vec<String>,
     keyword_map: HashMap<String, Vec<Keyword>>,
 }
-fn keyword_func_exec(func: &String, content: &String, start: usize, end: usize) -> bool {
+fn _boundary_char_check(ch: char) -> bool {
+    if (ch >= '0' && ch <= '9')
+                        || (ch >= 'a' && ch <= 'z')
+                        || (ch >= 'A' && ch <= 'Z')
+                        || (ch == '_') {
+                return false;
+        }
+        return true;
+
+}
+enum BoundaryCheck {
+    Right,
+    Left,
+}
+fn _boundary_check(payload: &String, start: usize, end: usize, bc: BoundaryCheck) -> bool {
+    match bc {
+        BoundaryCheck::Right => {
+            if end == payload.len() - 1 {
+                return true
+            }
+            match payload.chars().nth(end) {
+                Some(c) => {
+                    return _boundary_char_check(c)
+                },
+                _ => {
+                    return false
+                }
+            }
+        },
+        BoundaryCheck::Left => {
+            if start == 0 {
+                return true
+            }
+            match payload.chars().nth(start - 1) {
+                Some(c) => {
+                    return _boundary_char_check(c)
+                },
+                _ => {
+                    return false
+                }
+            }
+        }
+    }
+}
+fn keyword_func_exec(func: &String, payload: &String, start: usize, end: usize) -> bool {
     //TODO: func exec 
-    println!("exec func: {} content: {} start: {} end: {} ", func, content, start, end);
-    return true
+    println!("exec func: {} content: {} start: {} end: {} ", func, payload, start, end);
+    match func.as_str() {
+        "right" => {
+           return _boundary_check(payload, start, end, BoundaryCheck::Right); 
+        },
+        "left" => {
+           return _boundary_check(payload, start, end, BoundaryCheck::Left); 
+        },
+        "both" => {
+            if _boundary_check(payload, start, end, BoundaryCheck::Right) {
+                if _boundary_check(payload, start, end, BoundaryCheck::Left) {
+                    return true
+                }
+            }
+            false
+        },
+        "none" => {
+            true
+        },
+        _ => {
+            true
+        }
+    }
 }
 impl KeywordFilter {
     pub fn new() -> Self {
