@@ -1,16 +1,17 @@
 use serde::{Serialize, Deserialize};
-use wirefilter::{Scheme, Filter};
+use crate::filter::engine::{Scheme, Filter};
 pub struct RtRule<'s> {
     pub filter: Filter<'s>,
     pub rid: String,
+    pub kw: String,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Rule {
     pub id: String,
-    pub keyword: Vec<Keyword>,
-    pub content: String,
+    //pub keyword: Vec<Keyword>,
+    pub rule: String,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -22,18 +23,20 @@ pub struct Keyword {
     #[serde(rename = "after_check")]
     pub after_check: Option<String>,
 }
-
+/*
 impl Rule {
     pub fn get_keyword(self: &Rule) -> String {
         return serde_json::to_string(&self.keyword).unwrap();
     }
-}
+}*/
 
 impl<'s> RtRule<'s> {
     pub(crate) fn new(r: &Rule, scheme: &'s Scheme) -> Self {
-        println!("parse rule: {}", r.content.clone());
+        println!("parse rule: {}", r.rule.clone());
+        let ast = scheme.parse(&r.rule).unwrap();
         RtRule {
-            filter: scheme.parse(&r.content).unwrap().compile(),
+            kw: ast.function_to_string(),
+            filter: scheme.parse(&r.rule).unwrap().compile(),
             rid: r.id.clone(),
         }
     }

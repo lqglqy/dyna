@@ -98,10 +98,12 @@ impl KeywordFilter {
         return;
     }
     pub fn find_all(&self, mctx: & mut MatchResult, content: &String, feild: &String) {
+        //println!("find {} in {}", content.clone(), feild.clone());
         match &self.ac_filter{
             Some(ac) => {
+                //println!("find ac....");
                 for mat in ac.find_iter(content) {
-                    println!("match: {}", self.keyword_vec[mat.pattern()]);
+                    println!("ac match: {}", self.keyword_vec[mat.pattern()]);
                     let k = self.keyword_map.get(&self.keyword_vec[mat.pattern()]);
                     match k {
                         Some(kk) => {

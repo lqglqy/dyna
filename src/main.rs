@@ -3,26 +3,86 @@ use self::filter::prefilter::*;
 use self::filter::rule::*;
 use self::filter::result::*;
 use std::collections::HashMap;
-use wirefilter::{Scheme};
+use std::borrow::Cow;
+use self::filter::engine::{Scheme, Type, FunctionArgs, Function, FunctionParam, FunctionArgKind, FunctionImpl, LhsValue};
+fn arg_to_string(arg: LhsValue) -> String {
+    let mut s = String::new();
+    match arg {
+        LhsValue::Bytes(bytes) => {
+            match bytes {
+                Cow::Borrowed(bytes) => {
+                    s.push_str(std::str::from_utf8(bytes).unwrap())
+                },
+                _ => {},
+            };
+        }
+        _ => panic!("Invalid type: expected Bytes, got {:?}", arg),
+    }
+    s
+}
+fn prefilter_function<'a>(args: FunctionArgs<'_, 'a>) -> LhsValue<'a> {
+    let kw = arg_to_string(args.next().unwrap());
+
+    let feild = arg_to_string(args.next().unwrap());
+
+    let key_id = arg_to_string(args.next().unwrap());
+    let key = format!("|{}:{}|", key_id, feild);
+    println!("keyword is: {}", kw.clone());
+    LhsValue::Bool(kw.contains(&key))
+}
 fn main() {
-    let mut rs = Vec::new();
-    let r1: Rule = serde_json::from_str(&r#"{"id":"010000092","keyword":[{"id":4000,"content":"=","check_after":"none","target":["req.filename","req.args"]},{"id":4003,"content":"ref","check_after":"both","target":["req.filename","req.args"]}],"content":"((keyword contains \"|4000:req.filename|\" && keyword contains \"|4003:req.filename|\") && req.filename matches \"href=\") || ((keyword contains \"|4000:req.args|\" && keyword contains \"|4003:req.args|\") && req.args matches \"href=\")"}"#.to_string()).unwrap();
-    println!("r1.content: {}", r1.content.clone());
-    rs.push(r1);
-    let r2: Rule = serde_json::from_str(&r#"{"id":"090000072","keyword":[{"id":4006,"content":"def","check_after":"none","target":["req.filename","req.args"]},{"id":4007,"content":"abc","check_after":"both","target":["req.filename","req.args"]}],"content":"((keyword contains \"|4006:req.filename|\" && keyword contains \"|4007:req.filename|\") && req.filename matches \"abc\") || ((keyword contains \"|4006:req.args|\" && keyword contains \"|4007:req.args|\") && req.args matches \"def\")"}"#.to_string()).unwrap();
-    rs.push(r2);
-    let scheme = Scheme! {
-        req.filename: Bytes,
-        req.args: Bytes,
-        keyword: Bytes
+    let input_rs: Vec<Rule> = serde_json::from_str(&r#"[
+        {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"(String\\.fromCharCode\\(.*){4,}\")"},
+        {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"(?i)(eval\\(.{0,15}unescape\\()\")"}
+        ]"#.to_string()).unwrap();
+
+    let mut scheme = Scheme! {
+        keyword: Bytes,
+        http.response.status: Int,
+        http.response.header: Bytes,
+        http.response.body: Bytes,
     };
-    println!("111Rule Filter build done!!!");
-    let rf = RuleFilter::new(&rs, &scheme);
+    match scheme
+    .add_function(
+        "prefilter".into(),
+        Function {
+            params: vec![FunctionParam {
+                arg_kind: FunctionArgKind::Field,
+                val_type: Type::Bytes,
+            },FunctionParam {
+                arg_kind: FunctionArgKind::Literal,
+                val_type: Type::Bytes,
+            },FunctionParam {
+                arg_kind: FunctionArgKind::Literal,
+                val_type: Type::Bytes,
+            },FunctionParam {
+                arg_kind: FunctionArgKind::Literal,
+                val_type: Type::Bytes,
+            },FunctionParam {
+                arg_kind: FunctionArgKind::Literal,
+                val_type: Type::Bytes,
+                //default_value: LhsValue::Bytes(Cow::Borrowed(".".as_bytes())),
+            }],
+            opt_params: vec![],
+            return_type: Type::Bool,
+            implementation: FunctionImpl::new(prefilter_function),
+        },
+    ) {
+        Ok(_) => {},
+        _ => {
+            println!("add function failed!")
+        }
+
+    }
+    let rf = RuleFilter::new(&input_rs, &scheme);
     println!("Rule Filter build done!!!");
-    let pf = Prefilter::new(&rs);
+    let pf = Prefilter::new(&rf);
+    println!("PreFilter build done!!!");
     let mut feilds = HashMap::new();
-    feilds.insert("req.filename".to_string(), "a=1&&xxx=abcdef".to_string());
-    feilds.insert("req.args".to_string(), "bbb=def".to_string());
+    feilds.insert("http.response.body".to_string(), r#"<script type="text/javascript">
+    alert(<#String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)#>)
+    </script>"#.to_string());
+    feilds.insert("http.response.header".to_string(), "a=#eval(u".to_string());
     let mut mctx = MatchResult::new();
     pf.exec(&feilds, &mut mctx);
 
