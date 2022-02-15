@@ -1,7 +1,7 @@
 use crate::{
-    filter::engine::lex::{expect, skip_space, Lex, LexResult, LexWith},
-    filter::engine::rhs_types::{Bytes, IpRange, UninhabitedBool},
-    filter::engine::strict_partial_ord::StrictPartialOrd,
+    engine::lex::{expect, skip_space, Lex, LexResult, LexWith},
+    engine::rhs_types::{Bytes, IpRange, UninhabitedBool},
+    engine::strict_partial_ord::StrictPartialOrd,
 };
 use failure::Fail;
 use serde::{Deserialize, Serialize};

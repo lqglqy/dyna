@@ -1,4 +1,4 @@
-use crate::filter::engine::{
+use crate::engine::{
     scheme::{Field, Scheme},
     types::{GetType, LhsValue, TypeMismatchError},
 };
@@ -73,7 +73,7 @@ impl<'e> ExecutionContext<'e> {
 
 #[test]
 fn test_field_value_type_mismatch() {
-    use crate::filter::engine::types::Type;
+    use crate::engine::types::Type;
 
     let scheme = Scheme! { foo: Int };
 

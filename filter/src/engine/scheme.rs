@@ -1,8 +1,8 @@
 use crate::{
-    filter::engine::ast::FilterAst,
-    filter::engine::functions::Function,
-    filter::engine::lex::{complete, expect, span, take_while, LexErrorKind, LexResult, LexWith},
-    filter::engine::types::{GetType, Type},
+    engine::ast::FilterAst,
+    engine::functions::Function,
+    engine::lex::{complete, expect, span, take_while, LexErrorKind, LexResult, LexWith},
+    engine::types::{GetType, Type},
 };
 use failure::Fail;
 use fnv::FnvBuildHasher;
@@ -309,11 +309,11 @@ impl<'s> Scheme {
 #[macro_export]
 macro_rules! Scheme {
     ($($ns:ident $(. $field:ident)*: $ty:ident),* $(,)*) => {
-        $crate::Scheme::try_from_iter(
+        $crate::engine::Scheme::try_from_iter(
             [$(
                 (
                     concat!(stringify!($ns) $(, ".", stringify!($field))*),
-                    $crate::Type::$ty
+                    $crate::engine::Type::$ty
                 )
             ),*]
             .iter()

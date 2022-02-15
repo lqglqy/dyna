@@ -21,7 +21,7 @@ pub struct MatchResult{
 }
 
 impl<'s> MatchResult{
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         MatchResult{
             keywords: Vec::new(),
         }

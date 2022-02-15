@@ -1,6 +1,6 @@
 // use crate::filter::CompiledExpr;
 use super::{function_expr::FunctionCallExpr, Expr};
-use crate::filter::engine::{
+use crate::engine::{
     filter::CompiledExpr,
     heap_searcher::HeapSearcher,
     lex::{skip_space, span, Lex, LexErrorKind, LexResult, LexWith},
@@ -319,7 +319,7 @@ impl<'s> Expr<'s> for FieldExpr<'s> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::filter::engine::{
+    use crate::engine::{
         ast::function_expr::{FunctionCallArgExpr, FunctionCallExpr},
         execution_context::ExecutionContext,
         functions::{

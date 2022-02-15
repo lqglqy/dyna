@@ -4,7 +4,7 @@ use super::keyword::KeywordFilter;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use super::result::MatchResult;
-use crate::filter::engine::{ExecutionContext, Scheme};
+use crate::engine::{ExecutionContext, Scheme};
 
 
 
@@ -13,7 +13,7 @@ pub struct RuleFilter<'s> {
 }
 
 impl<'s> RuleFilter<'s> {
-    pub(crate) fn new(rules: &Vec<Rule>, scheme: &'s Scheme) -> Self {
+    pub fn new(rules: &Vec<Rule>, scheme: &'s Scheme) -> Self {
         let mut hmap = HashMap::new();
         for v in rules {
             hmap.insert(v.id.clone(), RtRule::new(&v, scheme));
@@ -93,7 +93,7 @@ pub struct Arg {
 
 
 impl<'s> Prefilter {
-    pub(crate) fn new(rs: &RuleFilter) -> Self {
+    pub fn new(rs: &RuleFilter) -> Self {
         let mut kmf: HashMap<String, KeywordFilter> = HashMap::new();
         for (id, rule) in rs.rules.iter() {
             let kw: RuleFunctions = serde_json::from_str(&rule.kw).unwrap();

@@ -1,5 +1,5 @@
 use super::field_expr::LhsFieldExpr;
-use crate::filter::engine::{
+use crate::engine::{
     execution_context::ExecutionContext,
     functions::{Function, FunctionArgKind, FunctionParam},
     lex::{expect, skip_space, span, take, take_while, LexError, LexErrorKind, LexResult, LexWith},
@@ -210,7 +210,7 @@ impl<'i, 's> LexWith<'i, &'s Scheme> for FunctionCallExpr<'s> {
 
 #[test]
 fn test_function() {
-    use crate::filter::engine::{
+    use crate::engine::{
         functions::{FunctionArgs, FunctionImpl, FunctionOptParam},
         scheme::UnknownFieldError,
         types::Type,

@@ -1,4 +1,4 @@
-use crate::filter::engine::lex::{expect, span, Lex, LexErrorKind, LexResult};
+use crate::engine::lex::{expect, span, Lex, LexErrorKind, LexResult};
 use cfg_if::cfg_if;
 use serde::{Serialize, Serializer};
 use std::{

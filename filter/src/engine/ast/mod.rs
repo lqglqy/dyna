@@ -5,7 +5,7 @@ mod simple_expr;
 
 use self::combined_expr::CombinedExpr;
 use self::function_expr::FunctionCallExpr;
-use crate::filter::engine::{
+use crate::engine::{
     filter::{CompiledExpr, Filter},
     lex::{LexResult, LexWith},
     scheme::{Field, Scheme, UnknownFieldError},

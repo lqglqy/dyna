@@ -1,4 +1,4 @@
-use crate::filter::engine::types::{LhsValue, Type};
+use crate::engine::types::{LhsValue, Type};
 use std::fmt;
 
 /// An iterator over function arguments as [`LhsValue`]s.

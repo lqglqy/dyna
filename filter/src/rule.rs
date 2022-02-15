@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use crate::filter::engine::{Scheme, Filter};
+use crate::engine::{Scheme, Filter};
 pub struct RtRule<'s> {
     pub filter: Filter<'s>,
     pub rid: String,

@@ -1,5 +1,5 @@
 use super::{combined_expr::CombinedExpr, field_expr::FieldExpr, CompiledExpr, Expr, function_expr::FunctionCallExpr};
-use crate::filter::engine::{
+use crate::engine::{
     lex::{expect, skip_space, Lex, LexResult, LexWith},
     scheme::{Field, Scheme},
 };
@@ -84,7 +84,7 @@ impl<'s> Expr<'s> for SimpleExpr<'s> {
 
 #[test]
 fn test() {
-    use crate::filter::engine::{execution_context::ExecutionContext, lex::complete};
+    use crate::engine::{execution_context::ExecutionContext, lex::complete};
 
     let scheme = &Scheme! { t: Bool };
 

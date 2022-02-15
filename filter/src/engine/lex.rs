@@ -1,4 +1,4 @@
-use crate::filter::engine::{
+use crate::engine::{
     rhs_types::RegexError,
     scheme::{UnknownFieldError, UnknownFunctionError},
     types::{Type, TypeMismatchError},
@@ -128,7 +128,7 @@ macro_rules! lex_enum {
             $item($ty),
         } {
             $($expr)*
-            if let Ok((res, $input)) = $crate::filter::engine::lex::Lex::lex($input) {
+            if let Ok((res, $input)) = $crate::engine::lex::Lex::lex($input) {
                 return Ok(($name::$item(res), $input));
             }
         } { $($rest)* });
@@ -150,7 +150,7 @@ macro_rules! lex_enum {
             $item $(= $value)*,
         } {
             $($expr)*
-            $(if let Ok($input) = $crate::filter::engine::lex::expect($input, $s) {
+            $(if let Ok($input) = $crate::engine::lex::expect($input, $s) {
                 return Ok(($name::$item, $input));
             })+
         } { $($rest)* });
@@ -165,11 +165,11 @@ macro_rules! lex_enum {
         $($preamble)*
         pub enum $name $decl
 
-        impl<'i> $crate::filter::engine::lex::Lex<'i> for $name {
-            fn lex($input: &'i str) -> $crate::filter::engine::lex::LexResult<'_, Self> {
+        impl<'i> $crate::engine::lex::Lex<'i> for $name {
+            fn lex($input: &'i str) -> $crate::engine::lex::LexResult<'_, Self> {
                 $($expr)*
                 Err((
-                    $crate::filter::engine::lex::LexErrorKind::ExpectedName(stringify!($name)),
+                    $crate::engine::lex::LexErrorKind::ExpectedName(stringify!($name)),
                     $input
                 ))
             }

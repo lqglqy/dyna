@@ -1,10 +1,9 @@
-pub mod filter;
-use self::filter::prefilter::*;
-use self::filter::rule::*;
-use self::filter::result::*;
+use dynafilter::prefilter::*;
+use dynafilter::rule::*;
+use dynafilter::result::*;
 use std::collections::HashMap;
 use std::borrow::Cow;
-use self::filter::engine::{Scheme, Type, FunctionArgs, Function, FunctionParam, FunctionArgKind, FunctionImpl, LhsValue};
+use dynafilter::engine::{Scheme, Type, FunctionArgs, Function, FunctionParam, FunctionArgKind, FunctionImpl, LhsValue};
 fn arg_to_string(arg: LhsValue) -> String {
     let mut s = String::new();
     match arg {
@@ -36,7 +35,7 @@ fn main() {
         {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"(?i)(eval\\(.{0,15}unescape\\()\")"}
         ]"#.to_string()).unwrap();
 
-    let mut scheme = Scheme! {
+    let mut scheme = dynafilter::Scheme! {
         keyword: Bytes,
         http.response.status: Int,
         http.response.header: Bytes,

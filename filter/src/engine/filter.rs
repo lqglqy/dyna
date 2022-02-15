@@ -1,4 +1,4 @@
-use crate::filter::engine::{execution_context::ExecutionContext, scheme::Scheme};
+use crate::engine::{execution_context::ExecutionContext, scheme::Scheme};
 use failure::Fail;
 
 /// An error that occurs if filter and provided [`ExecutionContext`] have
@@ -66,7 +66,7 @@ impl<'s> Filter<'s> {
 #[cfg(test)]
 mod tests {
     use super::{Filter, SchemeMismatchError};
-    use crate::filter::engine::execution_context::ExecutionContext;
+    use crate::engine::execution_context::ExecutionContext;
 
     #[test]
     fn test_scheme_mismatch() {
