@@ -90,5 +90,5 @@ fn main() {
     println!("!!!match keywords: {}", kw_str.clone());
     feilds.insert("keyword".to_string(), kw_str.clone());
     
-    rf.exec(&scheme, &feilds, mctx);
+    rf.exec(&scheme, &feilds, &mctx);
 }

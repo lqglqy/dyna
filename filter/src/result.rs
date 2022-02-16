@@ -37,7 +37,7 @@ impl<'s> MatchResult{
         }
     } 
 
-    pub fn get_hit_rules(self, rule: &mut HashSet<String>) {
+    pub fn get_hit_rules(&self, rule: &mut HashSet<String>) {
         for k in &self.keywords {
             rule.insert(k.rid.clone());
         }

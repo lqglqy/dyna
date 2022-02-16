@@ -22,7 +22,7 @@ impl<'s> RuleFilter<'s> {
             rules: hmap
         }
     }
-    pub fn exec(self, scheme: &'s Scheme, feilds: &'s HashMap<String,String>, mctx: MatchResult) {
+    pub fn exec(&self, scheme: &'s Scheme, feilds: &'s HashMap<String,String>, mctx: &MatchResult) {
         let mut hit_rules:HashSet<String> = HashSet::new();
         mctx.get_hit_rules(&mut hit_rules);
         let mut ctx = ExecutionContext::new(&scheme);
@@ -44,8 +44,9 @@ impl<'s> RuleFilter<'s> {
         for k in hit_rules {
             match self.rules.get(&k) {
                 Some(rule) => {
-                    println!("hit rule: {}", rule.rid.clone());
-                    println!("Filter matches: {:?}", rule.filter.execute(&ctx)); 
+                    //println!("hit rule: {}", rule.rid.clone());
+                    //rule.filter.execute(&ctx);
+                    println!("Filter rule: {} matches: {:?}", rule.rid.clone(), rule.filter.execute(&ctx)); 
                 },
                 _ => {
                     println!("not found rule {}", &k);
@@ -128,7 +129,7 @@ impl<'s> Prefilter {
 
     }
 
-    pub fn exec(self, feilds: &HashMap<String,String>, mctx: & mut MatchResult) {
+    pub fn exec(&self, feilds: &HashMap<String,String>, mctx: & mut MatchResult) {
         for (feild, content) in feilds.iter() {
             match self.maps.get(feild) {
                 Some(v) => {

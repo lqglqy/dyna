@@ -61,7 +61,7 @@ fn _boundary_check(payload: &String, start: usize, end: usize, bc: BoundaryCheck
 }
 fn keyword_func_exec(func: &String, payload: &String, start: usize, end: usize) -> bool {
     //TODO: func exec 
-    println!("exec func: {} content: {} start: {} end: {} ", func, payload, start, end);
+    //println!("exec func: {} content: {} start: {} end: {} ", func, payload, start, end);
     match func.as_str() {
         "right" => {
            return _boundary_check(payload, start, end, BoundaryCheck::Right); 
@@ -103,7 +103,7 @@ impl KeywordFilter {
             Some(ac) => {
                 //println!("find ac....");
                 for mat in ac.find_iter(content) {
-                    println!("ac match: {}", self.keyword_vec[mat.pattern()]);
+                    //println!("ac match: {}", self.keyword_vec[mat.pattern()]);
                     let k = self.keyword_map.get(&self.keyword_vec[mat.pattern()]);
                     match k {
                         Some(kk) => {

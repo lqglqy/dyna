@@ -1,0 +1,16 @@
+[package]
+name = "bench"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+failure = "0.1.1"
+serde_json = "1.0"
+
+[dependencies.dynafilter]
+path = "../filter"
+
+# cargo +nightly bench
+# ref: https://zhuanlan.zhihu.com/p/352614198
