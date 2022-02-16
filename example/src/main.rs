@@ -3,7 +3,7 @@ use dynafilter::rule::*;
 use dynafilter::result::*;
 use std::collections::HashMap;
 use std::borrow::Cow;
-use dynafilter::engine::{Scheme, Type, FunctionArgs, Function, FunctionParam, FunctionArgKind, FunctionImpl, LhsValue};
+use dynafilter::engine::{Type, FunctionArgs, Function, FunctionParam, FunctionArgKind, FunctionImpl, LhsValue};
 fn arg_to_string(arg: LhsValue) -> String {
     let mut s = String::new();
     match arg {
