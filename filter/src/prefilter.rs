@@ -4,6 +4,7 @@ use super::keyword::KeywordFilter;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use super::result::MatchResult;
+use super::result::RuleResult;
 use crate::engine::{ExecutionContext, Scheme};
 
 
@@ -22,7 +23,7 @@ impl<'s> RuleFilter<'s> {
             rules: hmap
         }
     }
-    pub fn exec(&self, scheme: &'s Scheme, feilds: &'s HashMap<String,String>, mctx: &MatchResult) {
+    pub fn exec(&self, scheme: &'s Scheme, feilds: &'s HashMap<String,String>, mctx: &MatchResult) -> Vec<RuleResult> {
         let mut hit_rules:HashSet<String> = HashSet::new();
         mctx.get_hit_rules(&mut hit_rules);
         let mut ctx = ExecutionContext::new(&scheme);
@@ -41,18 +42,23 @@ impl<'s> RuleFilter<'s> {
             }
         }
 
+        let mut rr = Vec::new();
         for k in hit_rules {
             match self.rules.get(&k) {
                 Some(rule) => {
                     //println!("hit rule: {}", rule.rid.clone());
                     //rule.filter.execute(&ctx);
-                    println!("Filter rule: {} matches: {:?}", rule.rid.clone(), rule.filter.execute(&ctx)); 
+                    if rule.filter.execute(&ctx).unwrap() {
+                        rr.push(RuleResult{rule_id: rule.rid.clone()});
+                    }
+                    //println!("Filter rule: {} matches: {:?}", rule.rid.clone(), rule.filter.execute(&ctx)); 
                 },
                 _ => {
-                    println!("not found rule {}", &k);
+                    //println!("not found rule {}", &k);
                 }
             }
         }
+        rr
     }
 
 }

@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use super::rule::Rule;
 #[derive(PartialEq, Eq, Clone)]
 pub struct MatchKeyword{
     id: i64,
@@ -16,24 +17,32 @@ impl MatchKeyword {
     }
 }
 
+pub struct RuleResult {
+    pub rule_id: String,
+}
+
 pub struct MatchResult{
     keywords: Vec<MatchKeyword>,
+    key_string: HashSet<String>,
 }
 
 impl<'s> MatchResult{
     pub fn new() -> Self {
         MatchResult{
             keywords: Vec::new(),
+            key_string: HashSet::new(),
         }
     }
 
     pub(crate) fn add_keyword(&mut self, content: String, id: i64, rid: String, feild: String) {
-        self.keywords.push(MatchKeyword{content: content, rid: rid, id: id, feild: feild});
+        self.keywords.push(MatchKeyword{content: content, rid: rid, id: id, feild: feild.clone()});
+        self.key_string.insert(format!("{}:{}|", id.to_string(), feild));
     }
 
     pub fn get_hit_keyword(&mut self, ret_str: &mut String)  {
-        for k in &self.keywords {
-            ret_str.push_str(&format!("{}:{}|", &k.id.to_string(), &k.feild));
+        for k in &self.key_string{
+            //ret_str.push_str(&format!("{}:{}|", &k.id.to_string(), &k.feild));
+            ret_str.push_str(k);
         }
     } 
 

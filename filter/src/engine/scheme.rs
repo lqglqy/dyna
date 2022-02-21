@@ -113,7 +113,7 @@ pub enum ItemRedefinitionError {
 /// An opaque filter parsing error associated with the original input.
 ///
 /// For now, you can just print it in a debug or a human-readable fashion.
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct ParseError<'i> {
     kind: LexErrorKind,
     input: &'i str,

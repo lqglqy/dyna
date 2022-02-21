@@ -92,18 +92,21 @@ impl KeywordFilter {
 
     pub fn build(&mut self){
         for (k, _) in &self.keyword_map{
+            //println!("push keyword: {}", k.clone());
             self.keyword_vec.push(k.clone());
         }
-        self.ac_filter = Some(AhoCorasickBuilder::new().dfa(true).build(&self.keyword_vec));
+        self.ac_filter = Some(AhoCorasickBuilder::new()
+                                .ascii_case_insensitive(true)
+                                .dfa(true).build(&self.keyword_vec));
         return;
     }
     pub fn find_all(&self, mctx: & mut MatchResult, content: &String, feild: &String) {
-        //println!("find {} in {}", content.clone(), feild.clone());
+        println!("find {} in {}", content.clone(), feild.clone());
         match &self.ac_filter{
             Some(ac) => {
-                //println!("find ac....");
+                println!("find ac....");
                 for mat in ac.find_iter(content) {
-                    //println!("ac match: {}", self.keyword_vec[mat.pattern()]);
+                    println!("ac match: {}", self.keyword_vec[mat.pattern()]);
                     let k = self.keyword_map.get(&self.keyword_vec[mat.pattern()]);
                     match k {
                         Some(kk) => {

@@ -7,7 +7,7 @@ use cidr::NetworkParseError;
 use failure::Fail;
 use std::num::ParseIntError;
 
-#[derive(Debug, PartialEq, Fail)]
+#[derive(Debug, Fail)]
 pub enum LexErrorKind {
     #[fail(display = "expected {}", _0)]
     ExpectedName(&'static str),

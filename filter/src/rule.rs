@@ -32,7 +32,7 @@ impl Rule {
 
 impl<'s> RtRule<'s> {
     pub(crate) fn new(r: &Rule, scheme: &'s Scheme) -> Self {
-        println!("parse rule: {}", r.rule.clone());
+        println!("parse id: {} rule: {}", r.id.clone(), r.rule.clone());
         let ast = scheme.parse(&r.rule).unwrap();
         RtRule {
             kw: ast.function_to_string(),

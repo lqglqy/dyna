@@ -1,9 +1,16 @@
+use std::fs::File;
+use std::fs;
+use std::io::{self, BufRead};
+use std::path::Path;
+use std::ffi::OsStr;
+use std::env;
 use dynafilter::prefilter::*;
 use dynafilter::rule::*;
 use dynafilter::result::*;
 use std::collections::HashMap;
 use std::borrow::Cow;
 use dynafilter::engine::{Type, FunctionArgs, Function, FunctionParam, FunctionArgKind, FunctionImpl, LhsValue};
+use sigtest::http_response_parse::*;
 fn arg_to_string(arg: LhsValue) -> String {
     let mut s = String::new();
     match arg {
@@ -29,21 +36,40 @@ fn prefilter_function<'a>(args: FunctionArgs<'_, 'a>) -> LhsValue<'a> {
     println!("keyword is: {}", kw.clone());
     LhsValue::Bool(kw.contains(&key))
 }
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where P: AsRef<Path>, {
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
+}
 fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let ruleFile = &args[1];
+    let sigDir = &args[2];
+    let mut input_rs: Vec<Rule> = Vec::new();
+
+    if let Ok(lines) = read_lines(ruleFile) {
+        for line in lines {
+            if let Ok(ruleStr) = line {
+                println!("{}", ruleStr);
+                input_rs.push(serde_json::from_str(&ruleStr).unwrap());
+            }
+        }
+    }
+
+    println!("read rule done");
+
+    /*
     let input_rs: Vec<Rule> = serde_json::from_str(&r#"[
-        {"id": "080210001", "rule": "prefilter(keyword, \"RESPONSE_BODY\",\"1058\",\"<meta name=\\\"generator\\\" content=\\\"\",\"none\") && (RESPONSE_BODY matches \"<meta\\s*name=\\\"generator\\\"\\s*content=\\\"((?:WordPress|MediaWiki|Joomla|Drupal).*)\\\"\\s*(\\/)?>\")"},
-        {"id": "080070001", "rule": "prefilter(keyword, \"RESPONSE_BODY\",\"352\",\":\\\\inetpub\",\"left\") && (RESPONSE_BODY matches \"([a-z]:\\\\inetpub\\b)\")"},
-        {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"(?i)((String\\.fromCharCode\\(.*){4,}\")"},
+        {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"(String\\.fromCharCode\\(.*){4,}\")"},
         {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"(?i)(eval\\(.{0,15}unescape\\()\")"}
         ]"#.to_string()).unwrap();
-//                {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharcode\", \"both\") && (http.response.body matches \"(?i)((String\\.fromCharCode\\(.*?){4,})\")"},
-
+        */
 
     let mut scheme = dynafilter::Scheme! {
         keyword: Bytes,
-        http.response.status: Int,
-        http.response.header: Bytes,
-        http.response.body: Bytes,
+        RESPONSE_STATUS: Bytes,
+        RESPONSE_HEADER: Bytes,
         RESPONSE_BODY: Bytes,
     };
     match scheme
@@ -82,11 +108,52 @@ fn main() {
     println!("Rule Filter build done!!!");
     let pf = Prefilter::new(&rf);
     println!("PreFilter build done!!!");
+    for entry in fs::read_dir(sigDir).unwrap() {
+        let e = entry.unwrap();
+        let file = e.path();
+        if !file.is_dir() {
+            let response = fs::read_to_string(file).unwrap();
+            let (_, status_line) = parse_status_line(response.as_bytes()).unwrap();
+            println!("status: {}", status_line.status);
+            let mut feilds = HashMap::new(); 
+            feilds.insert("RESPONSE_STATUS".to_string(), status_line.status.to_string());
+            match response.find("\r\n\r\n") {
+                Some(idx) => {
+                    feilds.insert("RESPONSE_HEADER".to_string(), response[0..idx].to_string());
+                    feilds.insert("RESPONSE_BODY".to_string(), response[idx..].to_string());
+                },
+                None => {
+                    feilds.insert("RESPONSE_HEADER".to_string(), response);
+                }
+            }
+            let mut mctx = MatchResult::new();
+            pf.exec(&feilds, &mut mctx);
+            let mut kw_str = String::from("|");
+            mctx.get_hit_keyword(&mut kw_str);
+            println!("!!!match keywords: {}", kw_str.clone());
+            feilds.insert("keyword".to_string(), kw_str.clone());
+            
+            let mr = rf.exec(&scheme, &feilds, &mctx);
+            let mut matched = false;
+            for r in mr {
+                if OsStr::new(&r.rule_id) == e.file_name() {
+                    println!("matched rule: {}", r.rule_id);
+                    matched = true;
+                }
+            }
+
+            if !matched {
+                println!("Oops: not match rule: {:?}", e.file_name());
+                break;
+            }
+        }
+    }
+    /*
     let mut feilds = HashMap::new();
-    feilds.insert("http.response.body".to_string(), r#"<script type="text/javascript">
+    feilds.insert("RESPONSE_BODY".to_string(), r#"<script type="text/javascript">
     alert(<#String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)#>)
     </script>"#.to_string());
-    feilds.insert("http.response.header".to_string(), "a=#eval(u".to_string());
+    feilds.insert("RESPONSE_HEADER".to_string(), "a=#eval(u".to_string());
     let mut mctx = MatchResult::new();
     pf.exec(&feilds, &mut mctx);
 
@@ -96,4 +163,5 @@ fn main() {
     feilds.insert("keyword".to_string(), kw_str.clone());
     
     rf.exec(&scheme, &feilds, &mctx);
+    */
 }
