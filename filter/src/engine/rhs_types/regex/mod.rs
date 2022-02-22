@@ -7,7 +7,7 @@ use std::{
 };
 
 cfg_if! {
-    if #[cfg(feature = "fancy-regex")] {
+    if #[cfg(feature = "pcre2")] {
         mod imp_real;
         pub use self::imp_real::*;
     } else {

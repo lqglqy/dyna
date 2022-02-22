@@ -39,8 +39,8 @@ mod tests {
     #[bench]
     fn bench_keyword(b: &mut Bencher) {
         let input_rs: Vec<Rule> = serde_json::from_str(&r#"[
-            {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"(String\\.fromCharCode\\(.*){4,}\")"},
-            {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"(?i)(eval\\(.{0,15}unescape\\()\")"}
+            {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"KD9pKSgoU3RyaW5nXC5mcm9tQ2hhckNvZGVcKC4qPyl7NCx9KQ==\")"},
+            {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"KD9pKShldmFsXCguezAsMTV9dW5lc2NhcGVcKCk=\")"}
             ]"#.to_string()).unwrap();
 
         let mut scheme = dynafilter::Scheme! {
@@ -105,8 +105,8 @@ mod tests {
     #[bench]
     fn bench_match(b: &mut Bencher) {
         let input_rs: Vec<Rule> = serde_json::from_str(&r#"[
-            {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"(String\\.fromCharCode\\(.*){4,}\")"},
-            {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"(?i)(eval\\(.{0,15}unescape\\()\")"}
+            {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"KD9pKSgoU3RyaW5nXC5mcm9tQ2hhckNvZGVcKC4qPyl7NCx9KQ==\")"},
+            {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"KD9pKShldmFsXCguezAsMTV9dW5lc2NhcGVcKCk=\")"}
             ]"#.to_string()).unwrap();
 
         let mut scheme = dynafilter::Scheme! {

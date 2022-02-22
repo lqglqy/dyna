@@ -63,7 +63,7 @@ pub fn parse_response(input: &[u8]) -> Result<HttpResponse, Box<dyn Error + '_>>
     let (input, headers) = parse_response_header(input)?;
     let content_length = headers.iter().find(|kv| kv.0.eq("Content-Length"))
         .map(|kv| kv.1.parse::<usize>().unwrap_or(0)).unwrap_or(0);
-    let (input, body) = parse_response_body(input, content_length)?;
+    let (_input, body) = parse_response_body(input, content_length)?;
     Ok(HttpResponse {
         status_line,
         headers,

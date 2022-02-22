@@ -3,7 +3,7 @@ use crate::engine::{Scheme, Filter};
 pub struct RtRule<'s> {
     pub filter: Filter<'s>,
     pub rid: String,
-    pub kw: String,
+    pub functions: String,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -35,7 +35,7 @@ impl<'s> RtRule<'s> {
         println!("parse id: {} rule: {}", r.id.clone(), r.rule.clone());
         let ast = scheme.parse(&r.rule).unwrap();
         RtRule {
-            kw: ast.function_to_string(),
+            functions: ast.function_to_string(),
             filter: scheme.parse(&r.rule).unwrap().compile(),
             rid: r.id.clone(),
         }

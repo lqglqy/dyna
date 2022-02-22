@@ -34,7 +34,7 @@ impl<'s> RuleFilter<'s> {
             val.push(&v[..]);
             match ctx.set_field_value(fs[fs.len()-1], val[val.len()-1]) {
                 Ok(_) => {
-                    println!("@@@set feild OK: {} value: {}", fs[fs.len()-1], val[val.len()-1]);
+                    //println!("@@@set feild OK: {} value: {}", fs[fs.len()-1], val[val.len()-1]);
                 },
                 Err(err) => {
                     println!("###set filed value error: {}", err);
@@ -57,7 +57,7 @@ impl<'s> RuleFilter<'s> {
                     //println!("not found rule {}", &k);
                 }
             }
-        }
+        }        
         rr
     }
 
@@ -65,6 +65,7 @@ impl<'s> RuleFilter<'s> {
 
 pub struct Prefilter {
     maps: HashMap<String, KeywordFilter>, // key: req.filename value: 
+    must_list: Vec<String>, // must match rule
 }
 
 pub fn add_rule(rs: &mut HashMap<String, RtRule>, r: &Rule) {
@@ -102,9 +103,11 @@ pub struct Arg {
 impl<'s> Prefilter {
     pub fn new(rs: &RuleFilter) -> Self {
         let mut kmf: HashMap<String, KeywordFilter> = HashMap::new();
+        let mut must_list: Vec<String> = vec![];
         for (id, rule) in rs.rules.iter() {
-            let kw: RuleFunctions = serde_json::from_str(&rule.kw).unwrap();
-            for f in kw {
+            let fs: RuleFunctions = serde_json::from_str(&rule.functions).unwrap();
+            let mut have_prefilter = false;
+            for f in fs {
                 if f.name == "prefilter" {
                     if f.args.len() != 5 {
                         println!("args count fail!!!");
@@ -119,7 +122,11 @@ impl<'s> Prefilter {
                         let kf = kmf.entry(feild.to_string()).or_insert(KeywordFilter::new());
                         kf.add(kid.parse::<i64>().unwrap(), id.clone(), keyword.to_string(), after_check.to_string());
                     }
+                    have_prefilter = true;
                 }
+            }
+            if !have_prefilter {
+                must_list.push(id.clone());
             }
 
         }
@@ -128,6 +135,7 @@ impl<'s> Prefilter {
         }
         Prefilter {
             maps: kmf,
+            must_list: must_list,
         }
     }
     
@@ -146,6 +154,6 @@ impl<'s> Prefilter {
                 }
             }
         }
-
+        mctx.must_match_rules = self.must_list.clone();
     }
 }

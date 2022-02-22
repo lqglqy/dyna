@@ -31,12 +31,9 @@ fn prefilter_function<'a>(args: FunctionArgs<'_, 'a>) -> LhsValue<'a> {
 }
 fn main() {
     let input_rs: Vec<Rule> = serde_json::from_str(&r#"[
-        {"id": "080210001", "rule": "prefilter(keyword, \"RESPONSE_BODY\",\"1058\",\"<meta name=\\\"generator\\\" content=\\\"\",\"none\") && (RESPONSE_BODY matches \"<meta\\s*name=\\\"generator\\\"\\s*content=\\\"((?:WordPress|MediaWiki|Joomla|Drupal).*)\\\"\\s*(\\/)?>\")"},
-        {"id": "080070001", "rule": "prefilter(keyword, \"RESPONSE_BODY\",\"352\",\":\\\\inetpub\",\"left\") && (RESPONSE_BODY matches \"([a-z]:\\\\inetpub\\b)\")"},
-        {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"(?i)((String\\.fromCharCode\\(.*){4,}\")"},
-        {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"(?i)(eval\\(.{0,15}unescape\\()\")"}
+            {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"KD9pKSgoU3RyaW5nXC5mcm9tQ2hhckNvZGVcKC4qPyl7NCx9KQ==\")"},
+            {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"KD9pKShldmFsXCguezAsMTV9dW5lc2NhcGVcKCk=\")"}
         ]"#.to_string()).unwrap();
-//                {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharcode\", \"both\") && (http.response.body matches \"(?i)((String\\.fromCharCode\\(.*?){4,})\")"},
 
 
     let mut scheme = dynafilter::Scheme! {
@@ -95,5 +92,8 @@ fn main() {
     println!("!!!match keywords: {}", kw_str.clone());
     feilds.insert("keyword".to_string(), kw_str.clone());
     
-    rf.exec(&scheme, &feilds, &mctx);
+    let result = rf.exec(&scheme, &feilds, &mctx);
+    for r in result {
+        println!("Hit Rule: {}", r.rule_id);
+    }
 }

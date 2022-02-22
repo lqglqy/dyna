@@ -92,7 +92,10 @@ def generatorRule( chain_flag, signature_id,signature_chain_index,regexp,support
         rule['rule'] = keyword
         #rule['rule'] = rule['rule'] + " && (" + meet_target + " matches \"" + regexp + "\")"
         #rule['rule'] = rule['rule'] + " && (" + meet_target + " matches " + json.dumps(regexp) + ")"
-        rule['rule'] = rule['rule'] + " && (" + meet_target + " matches \"" + base64.b64encode(regexp.encode()).decode() + "\")"
+        r = meet_target + " matches \"" + base64.b64encode(regexp.encode()).decode() + "\""
+        if operator == "nrx":
+            r = "not " + r
+        rule['rule'] = rule['rule'] + " && (" + r + ")"
         if signature_chain_index != '000000000':
             chain_rule = getChainRuleById(signature_chain_index)
             rule['rule'] = rule['rule'] + " && " + chain_rule

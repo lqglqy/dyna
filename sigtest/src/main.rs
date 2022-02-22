@@ -44,15 +44,15 @@ where P: AsRef<Path>, {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let ruleFile = &args[1];
-    let sigDir = &args[2];
+    let rule_file = &args[1];
+    let sig_dir = &args[2];
     let mut input_rs: Vec<Rule> = Vec::new();
 
-    if let Ok(lines) = read_lines(ruleFile) {
+    if let Ok(lines) = read_lines(rule_file) {
         for line in lines {
-            if let Ok(ruleStr) = line {
-                println!("{}", ruleStr);
-                input_rs.push(serde_json::from_str(&ruleStr).unwrap());
+            if let Ok(rule_str) = line {
+                println!("{}", rule_str);
+                input_rs.push(serde_json::from_str(&rule_str).unwrap());
             }
         }
     }
@@ -108,7 +108,7 @@ fn main() {
     println!("Rule Filter build done!!!");
     let pf = Prefilter::new(&rf);
     println!("PreFilter build done!!!");
-    for entry in fs::read_dir(sigDir).unwrap() {
+    for entry in fs::read_dir(sig_dir).unwrap() {
         let e = entry.unwrap();
         let file = e.path();
         if !file.is_dir() {
