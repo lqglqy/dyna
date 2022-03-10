@@ -59,13 +59,6 @@ fn main() {
 
     println!("read rule done");
 
-    /*
-    let input_rs: Vec<Rule> = serde_json::from_str(&r#"[
-        {"id": "080120001", "rule": "prefilter(keyword, \"http.response.body\", \"358\", \"String.fromCharCode\", \"both\") && (http.response.body matches \"(String\\.fromCharCode\\(.*){4,}\")"},
-        {"id": "080120002", "rule": "prefilter(keyword, \"http.response.header\", \"359\", \"eval(\", \"left\") && (http.response.header matches \"(?i)(eval\\(.{0,15}unescape\\()\")"}
-        ]"#.to_string()).unwrap();
-        */
-
     let mut scheme = dynafilter::Scheme! {
         keyword: Bytes,
         RESPONSE_STATUS: Bytes,
@@ -148,20 +141,4 @@ fn main() {
             }
         }
     }
-    /*
-    let mut feilds = HashMap::new();
-    feilds.insert("RESPONSE_BODY".to_string(), r#"<script type="text/javascript">
-    alert(<#String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)String.fromCharCode(72, 69, 76, 76, 79)#>)
-    </script>"#.to_string());
-    feilds.insert("RESPONSE_HEADER".to_string(), "a=#eval(u".to_string());
-    let mut mctx = MatchResult::new();
-    pf.exec(&feilds, &mut mctx);
-
-    let mut kw_str = String::from("|");
-    mctx.get_hit_keyword(&mut kw_str);
-    println!("!!!match keywords: {}", kw_str.clone());
-    feilds.insert("keyword".to_string(), kw_str.clone());
-    
-    rf.exec(&scheme, &feilds, &mctx);
-    */
 }

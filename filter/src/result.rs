@@ -1,4 +1,6 @@
 use std::collections::HashSet;
+use serde::{Deserialize, Serialize};
+
 #[derive(PartialEq, Eq, Clone)]
 pub struct MatchKeyword{
     id: i64,
@@ -16,6 +18,7 @@ impl MatchKeyword {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct RuleResult {
     pub rule_id: String,
 }
